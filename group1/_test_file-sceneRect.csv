@@ -1,0 +1,5 @@
+Filename,Label,LabelTimeStamp,Spec_NStep,Spec_NWin,Spec_x1,Spec_y1,Spec_x2,Spec_y2,LabelStartTime_Seconds,LabelEndTime_Seconds,LabelArea_DataPoints,DetectorConfidence
+/test_file.wav,bat,2020-03-31T18:38:32.989569,0.001,0.003,37.647,0,38.647,661.5,0.038,0.039,,1.0
+/test_file.wav,bat,2020-03-31T18:38:32.989569,0.001,0.003,70.588,0,71.588,661.5,0.071,0.072,,0.368
+/test_file.wav,bat,2020-03-31T18:38:32.989569,0.001,0.003,169.412,0,170.412,661.5,0.169,0.17,,1.0
+/test_file.wav,bat,2020-03-31T18:38:32.989569,0.001,0.003,268.235,0,269.235,661.5,0.268,0.269,,1.0

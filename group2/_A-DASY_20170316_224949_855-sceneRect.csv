@@ -1,0 +1,2 @@
+Filename,Label,LabelTimeStamp,Spec_NStep,Spec_NWin,Spec_x1,Spec_y1,Spec_x2,Spec_y2,LabelStartTime_Seconds,LabelEndTime_Seconds,LabelArea_DataPoints,DetectorConfidence
+/A-DASY_20170316_224949_855.wav,bat,2020-03-31T21:10:28.745075,0.001,0.003,315.294,0,316.294,576.0,0.315,0.316,,0.908
