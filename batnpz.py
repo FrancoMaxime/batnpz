@@ -66,7 +66,7 @@ def cleaning(group):
                         tmp = float(call['LabelStartTime_Seconds'])
                         if tmp > 9:
                             tmp/= 1000.0
-                        calls.append(tmp)
+                        calls.append(np.array([tmp]))
                     if len(calls) > 0:
                         with open('data' + group + '.csv') as tfile:
                             treader = csv.DictReader(tfile, delimiter=',')
@@ -83,7 +83,7 @@ def cleaning(group):
                                             if tmp > 9:
                                                 tmp /= 1000.0
                                             train_durations.append(tmp)
-                                            train_pos.append(calls)
+                                            train_pos.append(np.array(calls))
                                             train_class.append(species[trow['Id']])
                                         else:
                                             test_files.append(row['IN FILE'])
@@ -91,7 +91,7 @@ def cleaning(group):
                                             if tmp > 9:
                                                 tmp /= 1000.0
                                             test_durations.append(tmp)
-                                            test_pos.append(calls)
+                                            test_pos.append(np.array(calls))
                                             test_class.append(species[trow['Id']])
                                     break
                                     
