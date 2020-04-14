@@ -54,7 +54,6 @@ species['Rhifer'] = 7
 species['Rhihip'] = 7
 
 def cleaning(group): 
-    global train_durations, train_files, train_pos
     with open('meta' + group + '.csv') as cfile:
         creader = csv.DictReader(cfile, delimiter=',')
         for row in creader:
@@ -99,10 +98,59 @@ def cleaning(group):
                                     break
                                     
                                                 
+def directory(path):
+    for x in os.listdir(path):
+        if ".wav" in x:
+            sub = subprocess.Popen("soxi " + path + x, shell=True, stdout=subprocess.PIPE)
+            ret = sub.stdout.read()
+            ret = ret.split("\n")
+            duration = int(ret[5].split(' : ')[1].split("=")[0])
+            print(str(duration))
+            
+            with open('group/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
+                dreader = csv.DictReader(dfile, delimiter=',')
+                calls = []
+                for call in dreader:
+                    tmp = float(call['LabelStartTime_Seconds'])
+                    if tmp > 9:
+                        tmp/= 1000.0
+                    tmp *= 10
+                    calls.append(np.array([tmp]))
+                if len(calls) > 0:
+                    with open('data' + group + '.csv') as tfile:
+                        treader = csv.DictReader(tfile, delimiter=',')
+                        for trow in treader:
+                            if trow['File'] == row['IN FILE']:
+                                if trow['Id'] != 'ChiroSp':
+                                    cond = float(len(train_durations) + len(test_durations))
+                                    if cond != 0:
+                                        cond = len(train_durations) / cond
+                                    
+                                    if cond < (5.0/6):
+                                        train_files.append(row['IN FILE'].split('.')[0])
+                                        tmp = float(duration)
+                                        if tmp > 9:
+                                            tmp /= 1000.0
+                                        tmp *= 10
+                                        train_durations.append(tmp)
+                                        train_pos.append(np.array(calls))
+                                        train_class.append(species[trow['Id']])
+                                    else:
+                                        test_files.append(row['IN FILE'].split('.')[0])
+                                        tmp = float(row['DURATION'])
+                                        if tmp > 9:
+                                            tmp /= 1000.0
+                                        tmp *=10
+                                        test_durations.append(tmp)
+                                        test_pos.append(np.array(calls))
+                                        test_class.append(species[trow['Id']])
+                                break
+
+
 
 cleaning('1')
 cleaning('2')
-
+directory("/storage/Barba_Lux_2017")
 
 train_durations = np.array(train_durations)
 train_files = np.array(train_files)
