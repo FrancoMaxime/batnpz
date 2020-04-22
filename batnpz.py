@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 import csv
 import numpy as np
-
+import os
+import subprocess
 
 train_durations = []
 train_files = []
@@ -44,6 +46,7 @@ species['Pip50'] = 5
 species['pippiT'] = 5
 species['PippiT'] = 5
 species['pippyg'] = 5
+species['Pippyg'] = 5
 
 species['Plesp'] = 6
 species['Pleaur'] = 6
@@ -52,6 +55,8 @@ species['Pleaus'] = 6
 species['Rhisp'] = 7
 species['Rhifer'] = 7
 species['Rhihip'] = 7
+
+countspecies={1 : [0,0], 1 : [0,0], 2 : [0,0], 3 : [0,0], 4 : [0,0], 5 : [0,0], 6 : [0,0], 7 : [0,0]}
 
 def cleaning(group): 
     with open('meta' + group + '.csv') as cfile:
@@ -72,12 +77,13 @@ def cleaning(group):
                             treader = csv.DictReader(tfile, delimiter=',')
                             for trow in treader:
                                 if trow['File'] == row['IN FILE']:
-                                    if trow['Id'] != 'ChiroSp':
-                                        cond = float(len(train_durations) + len(test_durations))
+                                    if trow['Id'] not in ('ChiroSp', 'Pipsp', 'Nycsp'):
+                                        cond = float( sum( countspecies[species[trow['Id']]] ) )
                                         if cond != 0:
-                                            cond = len(train_durations) / cond
+                                            cond = countspecies[species[trow['Id']]][0] / cond
                                         
-                                        if cond < (5.0/6):
+                                        if cond < (9.0/10):
+                                            countspecies[species[trow['Id']]][0] += 1
                                             train_files.append(row['IN FILE'].split('.')[0])
                                             tmp = float(row['DURATION'])
                                             if tmp > 9:
@@ -87,6 +93,7 @@ def cleaning(group):
                                             train_pos.append(np.array(calls))
                                             train_class.append(species[trow['Id']])
                                         else:
+                                            countspecies[species[trow['Id']]][1] += 1
                                             test_files.append(row['IN FILE'].split('.')[0])
                                             tmp = float(row['DURATION'])
                                             if tmp > 9:
@@ -98,49 +105,55 @@ def cleaning(group):
                                     break
                                     
                                                 
-def directory(path):
+def directory(path, name="data.csv"):
     for x in os.listdir(path):
         if ".wav" in x:
             sub = subprocess.Popen("soxi " + path + x, shell=True, stdout=subprocess.PIPE)
             ret = sub.stdout.read()
             ret = ret.split("\n")
-            duration = int(ret[5].split(' : ')[1].split("=")[0])
-            print(str(duration))
-            
-            with open('group/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
+            duration = float(ret[5].split(' : ')[1].split("=")[0].split(':')[-1])
+
+            with open(path + 'individual_results/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
                 dreader = csv.DictReader(dfile, delimiter=',')
                 calls = []
                 for call in dreader:
                     tmp = float(call['LabelStartTime_Seconds'])
-                    if tmp > 9:
+                    if tmp > 99:
+                        print(tmp)
+                        print(duration)
                         tmp/= 1000.0
-                    tmp *= 10
-                    calls.append(np.array([tmp]))
+                    if tmp < (duration - 0.25):
+                        print(str(tmp) + "      " + str(duration))
+                    	calls.append(np.array([tmp]))
                 if len(calls) > 0:
-                    with open('data' + group + '.csv') as tfile:
+                    with open(path + name) as tfile:
                         treader = csv.DictReader(tfile, delimiter=',')
                         for trow in treader:
-                            if trow['File'] == row['IN FILE']:
-                                if trow['Id'] != 'ChiroSp':
-                                    cond = float(len(train_durations) + len(test_durations))
+                            nam = None
+                            if "Fichier" in trow:
+                                nam = trow['Fichier']
+                            if nam == '' or nam is None:
+                                nam = trow['File']
+                            if nam == x:
+                                if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp'):
+                                    cond = float(sum(countspecies[species[trow['Id']]]))
                                     if cond != 0:
-                                        cond = len(train_durations) / cond
-                                    
-                                    if cond < (5.0/6):
-                                        train_files.append(row['IN FILE'].split('.')[0])
+                                        cond = countspecies[species[trow['Id']]][0] / cond
+                                    if cond < (9.0/10):
+                                        countspecies[species[trow['Id']]][0] += 1
+                                        train_files.append(path + x.split('.')[0])
                                         tmp = float(duration)
-                                        if tmp > 9:
+                                        if tmp > 99:
                                             tmp /= 1000.0
-                                        tmp *= 10
                                         train_durations.append(tmp)
                                         train_pos.append(np.array(calls))
                                         train_class.append(species[trow['Id']])
                                     else:
-                                        test_files.append(row['IN FILE'].split('.')[0])
-                                        tmp = float(row['DURATION'])
-                                        if tmp > 9:
+                                        countspecies[species[trow['Id']]][1] += 1
+                                        test_files.append(path + x.split('.')[0])
+                                        tmp = float(duration)
+                                        if tmp > 99:
                                             tmp /= 1000.0
-                                        tmp *=10
                                         test_durations.append(tmp)
                                         test_pos.append(np.array(calls))
                                         test_class.append(species[trow['Id']])
@@ -150,7 +163,17 @@ def directory(path):
 
 cleaning('1')
 cleaning('2')
-directory("/storage/Barba_Lux_2017")
+directory("/storage/Barba_Lux_2017/")
+directory("/storage/Barba_Lux_2018/")
+directory("/storage/LPB2018/", "found_LPB2018.csv")
+directory("/storage/Barbalux_2016/", "found_Barbalux_2016.csv")
+directory("/storage/Ecoduc20150801-04_CecileHerr/", "found_Ecoduc20150801-04_CecileHerr.csv")
+directory("/storage/études_complémentaires/", 'found_études complémentaires.csv')
+directory("/storage/plateau_Engeland/", 'found_plateau Engeland.csv')
+directory("/storage/Plecobrux_SM4_cécile/","found_Plecobrux SM4 cécile.csv")
+directory("/storage/TrouPicotIntérieurJuin2014/", "found_TrouPicotIntérieurJuin2014.csv")
+
+
 
 train_durations = np.array(train_durations)
 train_files = np.array(train_files)
