@@ -111,19 +111,20 @@ def directory(path, name="data.csv"):
             sub = subprocess.Popen("soxi " + path + x, shell=True, stdout=subprocess.PIPE)
             ret = sub.stdout.read()
             ret = ret.split("\n")
-            duration = float(ret[5].split(' : ')[1].split("=")[0].split(':')[-1])
-
+            
+            duration = ret[5].split(' : ')[1].split("=")[0].split(':')
+            duration = float(duration[0]) * 3600 + float(duration[1]) * 60 + float(duration[2])
+            
             with open(path + 'individual_results/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
                 dreader = csv.DictReader(dfile, delimiter=',')
                 calls = []
                 for call in dreader:
-                    tmp = float(call['LabelStartTime_Seconds'])
-                    if tmp > 99:
-                        print(tmp)
-                        print(duration)
-                        tmp/= 1000.0
+                    tmp = call['LabelStartTime_Seconds']
+                    if not '.' in tmp:
+                        tmp = float(tmp) / 1000.0
+                    else:
+                        tmp = float(tmp)
                     if tmp < (duration - 0.25):
-                        print(str(tmp) + "      " + str(duration))
                     	calls.append(np.array([tmp]))
                 if len(calls) > 0:
                     with open(path + name) as tfile:
@@ -137,14 +138,13 @@ def directory(path, name="data.csv"):
                             if nam == x:
                                 if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp'):
                                     cond = float(sum(countspecies[species[trow['Id']]]))
+                                    
                                     if cond != 0:
                                         cond = countspecies[species[trow['Id']]][0] / cond
                                     if cond < (9.0/10):
                                         countspecies[species[trow['Id']]][0] += 1
                                         train_files.append(path + x.split('.')[0])
                                         tmp = float(duration)
-                                        if tmp > 99:
-                                            tmp /= 1000.0
                                         train_durations.append(tmp)
                                         train_pos.append(np.array(calls))
                                         train_class.append(species[trow['Id']])
@@ -152,8 +152,6 @@ def directory(path, name="data.csv"):
                                         countspecies[species[trow['Id']]][1] += 1
                                         test_files.append(path + x.split('.')[0])
                                         tmp = float(duration)
-                                        if tmp > 99:
-                                            tmp /= 1000.0
                                         test_durations.append(tmp)
                                         test_pos.append(np.array(calls))
                                         test_class.append(species[trow['Id']])
@@ -172,7 +170,18 @@ directory("/storage/études_complémentaires/", 'found_études complémentaires.
 directory("/storage/plateau_Engeland/", 'found_plateau Engeland.csv')
 directory("/storage/Plecobrux_SM4_cécile/","found_Plecobrux SM4 cécile.csv")
 directory("/storage/TrouPicotIntérieurJuin2014/", "found_TrouPicotIntérieurJuin2014.csv")
+directory("/storage/my_test/", "found_my_test.csv")
+directory("/storage/CavesPahautAutomne2013/", "found_CavesPahautAutomne2013.csv")
+directory("/storage/Copie_de_Brabantwallon2014/", "found_Copie de Brabantwallon2014.csv")
+directory("/storage/Copie_de_Vesdre2014/", "found_Copie de Vesdre2014.csv")
+directory("/storage/GueuleTOUT/", "found_GueuleTOUT.csv")
+directory("/storage/JenneretTOUT/", "found_JenneretTOUT.csv")
+directory("/storage/LIFEPrairiesBocageres_2013_TOUT_test/", "found_LIFEPrairiesBocageres_2013_TOUT_test.csv")
+directory("/storage/LIFEPrairiesBocageres_2014/", "found_LIFEPrairiesBocageres_2014.csv")
+directory("/storage/Plecobrux_ligne_161_Tout/", 'found_Plecobrux ligne 161_Tout.csv')
+directory("/storage/Plecolux_2016-TOUT/", "found_Plecolux 2016-TOUT.csv")
 
+directory ("/storage/SM2_Escaut2015/", "found_SM2_Escaut2015.csv")
 
 
 train_durations = np.array(train_durations)
@@ -185,3 +194,12 @@ test_pos = np.array(test_pos)
 test_class = np.array(test_class)
 
 np.savez("test.npz", train_durations=train_durations, train_files=train_files, train_pos=train_pos, train_class=train_class, test_durations=test_durations, test_files=test_files, test_pos=test_pos, test_class=test_class)
+l = train_class
+
+for team in [ele for ind, ele in enumerate(l,1) if ele not in l[ind:]]:
+    count = 0
+    for ele in l:
+        if team == ele:
+            count += 1
+    print("{} {}".format(team, count))
+    count =0
