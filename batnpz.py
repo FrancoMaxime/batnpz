@@ -107,56 +107,67 @@ def cleaning(group):
                                     
                                                 
 def directory(path, name="data.csv"):
-    for x in os.listdir(path):
-        if ".wav" in x:
-            sub = subprocess.Popen("soxi " + path + x, shell=True, stdout=subprocess.PIPE)
-            ret = sub.stdout.read()
-            ret = ret.split("\n")
-            
-            duration = ret[5].split(' : ')[1].split("=")[0].split(':')
-            duration = float(duration[0]) * 3600 + float(duration[1]) * 60 + float(duration[2])
-            
-            with open(path + 'individual_results/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
-                dreader = csv.DictReader(dfile, delimiter=',')
-                calls = []
-                for call in dreader:
-                    tmp = call['LabelStartTime_Seconds']
-                    if not '.' in tmp:
-                        tmp = float(tmp) / 1000.0
-                    else:
-                        tmp = float(tmp)
-                    if tmp < (duration - 0.25):
-                    	calls.append(np.array([tmp]))
-                if len(calls) > 0:
-                    with open(path + name) as tfile:
-                        treader = csv.DictReader(tfile, delimiter=',')
-                        for trow in treader:
-                            nam = None
-                            if "Fichier" in trow:
-                                nam = trow['Fichier']
-                            if nam == '' or nam is None:
-                                nam = trow['File']
-                            if nam == x:
-                                if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp')  and duration < 60:
-                                    cond = float(sum(countspecies[species[trow['Id']]]))
-                                    
-                                    if cond != 0:
-                                        cond = countspecies[species[trow['Id']]][0] / cond
-                                    if cond < (9.0/10):
-                                        countspecies[species[trow['Id']]][0] += 1
-                                        train_files.append(path + x.split('.')[0])
-                                        tmp = float(duration)
-                                        train_durations.append(tmp)
-                                        train_pos.append(np.array(calls))
-                                        train_class.append(species[trow['Id']])
-                                    else:
-                                        countspecies[species[trow['Id']]][1] += 1
-                                        test_files.append(path + x.split('.')[0])
-                                        tmp = float(duration)
-                                        test_durations.append(tmp)
-                                        test_pos.append(np.array(calls))
-                                        test_class.append(species[trow['Id']])
-                                break
+    fn = ["Directory", "File", "Id"] 
+    with open('cut.csv', 'a') as cut:
+        csv_cut = csv.DictWriter(cut, fieldnames=fn)
+        for x in os.listdir(path):
+            if ".wav" in x:
+                sub = subprocess.Popen("soxi " + path + x, shell=True, stdout=subprocess.PIPE)
+                ret = sub.stdout.read()
+                ret = ret.split("\n")
+                
+                duration = ret[5].split(' : ')[1].split("=")[0].split(':')
+                duration = float(duration[0]) * 3600 + float(duration[1]) * 60 + float(duration[2])
+                
+                with open(path + 'individual_results/_' + x.split('.wav')[0] + '-sceneRect.csv') as dfile:
+                    dreader = csv.DictReader(dfile, delimiter=',')
+                    calls = []
+                    for call in dreader:
+                        tmp = call['LabelStartTime_Seconds']
+                        if not '.' in tmp:
+                            tmp = float(tmp) / 1000.0
+                        else:
+                            tmp = float(tmp)
+                        if tmp < (duration - 0.25):
+                            calls.append(np.array([tmp]))
+                    if len(calls) > 0:
+                        with open(path + name) as tfile:
+                            treader = csv.DictReader(tfile, delimiter=',')
+                            for trow in treader:
+                                nam = None
+                                if "Fichier" in trow:
+                                    nam = trow['Fichier']
+                                    trow['File'] = nam
+                                if nam == '' or nam is None:
+                                    nam = trow['File']
+                                if nam == x:
+                                    if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp'):
+                                        if duration < 50:
+                                            cond = float(sum(countspecies[species[trow['Id']]]))
+                                            
+                                            if cond != 0:
+                                                cond = countspecies[species[trow['Id']]][0] / cond
+                                            if cond < (9.0/10):
+                                                countspecies[species[trow['Id']]][0] += 1
+                                                train_files.append(path + x.split('.')[0])
+                                                tmp = float(duration)
+                                                train_durations.append(tmp)
+                                                train_pos.append(np.array(calls))
+                                                train_class.append(species[trow['Id']])
+                                            else:
+                                                countspecies[species[trow['Id']]][1] += 1
+                                                test_files.append(path + x.split('.')[0])
+                                                tmp = float(duration)
+                                                test_durations.append(tmp)
+                                                test_pos.append(np.array(calls))
+                                                test_class.append(species[trow['Id']])
+                                        else:
+                                            tmp= {}
+                                            tmp["Id"] = trow["Id"]
+                                            tmp["File"] = trow["File"]
+                                            tmp["Directory"] = trow["Directory"]
+                                            csv_cut.writerow(tmp)
+                                    break
 
 
 
