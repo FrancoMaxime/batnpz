@@ -56,7 +56,7 @@ species['Rhisp'] = 7
 species['Rhifer'] = 7
 species['Rhihip'] = 7
 
-countspecies={1 : [0,0], 1 : [0,0], 2 : [0,0], 3 : [0,0], 4 : [0,0], 5 : [0,0], 6 : [0,0], 7 : [0,0]}
+countspecies={ 1 : [0,0], 2 : [0,0], 3 : [0,0], 4 : [0,0], 5 : [0,0], 6 : [0,0], 7 : [0,0]}
 
 def cleaning(group): 
     with open('meta' + group + '.csv') as cfile:
@@ -77,8 +77,9 @@ def cleaning(group):
                             treader = csv.DictReader(tfile, delimiter=',')
                             for trow in treader:
                                 if trow['File'] == row['IN FILE']:
-                                    if trow['Id'] not in ('ChiroSp', 'Pipsp', 'Nycsp'):
+                                    if trow['Id'] not in ('ChiroSp', 'Pipsp', 'Nycsp') and countspecies[species[trow['Id']]][0] < 201:
                                         cond = float( sum( countspecies[species[trow['Id']]] ) )
+                                        
                                         if cond != 0:
                                             cond = countspecies[species[trow['Id']]][0] / cond
                                         
@@ -136,7 +137,7 @@ def directory(path, name="data.csv"):
                             if nam == '' or nam is None:
                                 nam = trow['File']
                             if nam == x:
-                                if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp'):
+                                if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp')  and duration < 60:
                                     cond = float(sum(countspecies[species[trow['Id']]]))
                                     
                                     if cond != 0:
