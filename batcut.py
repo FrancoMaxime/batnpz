@@ -2,7 +2,7 @@ import subprocess
 import csv
 import datetime
 import shutil
-#from pydub import AudioSegment
+from pydub import AudioSegment
 
 def batcut(directory, filename, drow):
     timer = [0]
@@ -93,15 +93,16 @@ def batcut(directory, filename, drow):
         with open('ok.csv', 'a') as to_cut:
             csv_cut = csv.DictWriter(to_cut, fieldnames=fn)
             tmp_name = drow['File'].split(".wav")[0]
-            """actual_audio = AudioSegment.from_wav(directory + filename)
+            actual_audio = AudioSegment.from_wav(directory + filename)
+            print(timer)
             for i in range(1,len(timer)):
                 drow['File'] = tmp_name + "_" + str(i) + ".wav"
                 csv_cut.writerow(drow)
                 begin = timer[i-1]*1000
                 end = timer[i]*1000
                 new_audio = actual_audio[begin : end]
-                new_audio.export("/home/maxime/Documents/memoire/batnpz/" + drow['File'], format="wav")
-            """
+                new_audio.export("/home/batmen/batnpz/" + drow['File'], format="wav")
+            
             
  
 def findcut():
@@ -111,6 +112,6 @@ def findcut():
             batcut(row["Directory"], row['File'], row)
 
 
-#batcut("/home/batmen/batnpz/", "38.wav", {"Directory" : "flip", "File" : "test.wav", "Id" : "etetet"})
-batcut("/home/maxime/Documents/memoire/batnpz/", "38.wav", {"Directory" : "/home/maxime/Documents/memoire/batnpz/", "File" : "38.wav", "Id" : "etetet"})
+batcut("/home/batmen/batnpz/", "38.wav", {"Directory" : "/home/batmen/batnpz/", "File" : "38.wav", "Id" : "etetet"})
+#batcut("/home/maxime/Documents/memoire/batnpz/", "38.wav", {"Directory" : "/home/maxime/Documents/memoire/batnpz/", "File" : "38.wav", "Id" : "etetet"})
 #findcut()
