@@ -165,7 +165,7 @@ def directory(path, name="data.csv"):
                                             tmp= {}
                                             tmp["Id"] = trow["Id"]
                                             tmp["File"] = trow["File"]
-                                            tmp["Directory"] = trow["Directory"]
+                                            tmp["Directory"] = path
                                             csv_cut.writerow(tmp)
                                     break
 
