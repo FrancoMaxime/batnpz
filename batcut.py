@@ -2,7 +2,7 @@ import subprocess
 import csv
 import datetime
 import shutil
-from pydub import AudioSegment
+#from pydub import AudioSegment
 
 def batcut(directory, filename, drow):
     timer = [0]
@@ -10,6 +10,13 @@ def batcut(directory, filename, drow):
     previous_start_call = 0
     max_timer = 45
     error = False
+    sub = subprocess.Popen("soxi " + directory + filename, shell=True, stdout=subprocess.PIPE)
+    ret = sub.stdout.read()
+    print(type(ret))
+    ret = ret.split("\n")
+    
+    duration = ret[5].split(' : ')[1].split("=")[0].split(':')
+    duration = float(duration[0]) * 3600 + float(duration[1]) * 60 + float(duration[2])
     with open(directory + "individual_results/_" + filename.split(".wav")[0] + "-sceneRect.csv", 'r') as calls:
         csv_call = csv.DictReader(calls, delimiter=',') 
         for row in csv_call:
@@ -44,8 +51,10 @@ def batcut(directory, filename, drow):
             previous_end_call = end_call
             previous_start_call = start_call
 
-        if previous_end_call > timer[-1]:
-            timer.append(previous_end_call)
+        while duration - timer[-1] > max_timer:
+            timer.append(timer[-1] + max_timer)
+        timer.append(duration)
+                
     with open(directory + "individual_results/_" + filename.split(".wav")[0] + "-sceneRect.csv", 'r') as calls:
         csv_call = csv.DictReader(calls, delimiter=',') 
         ind_b = 0
@@ -74,8 +83,6 @@ def batcut(directory, filename, drow):
             if ind_e < len(timer) and not(timer[ind_b] <= start_call and end_call <=  timer[ind_e]):
                 print("ERROOOR  Start : " + str(timer[ind_b]) + " call : " + str(start_call) + " - " + str(end_call) + "   End : " + str(timer[ind_e]))
                 error = True
-            #else:
-            #    print("Start : " + str(timer[ind_b]) + " call : " + str(start_call) + " - " + str(end_call) + "   End : " + str(timer[ind_e]))
             
     fn = ["Directory", "File", "Id"] 
     if error:
@@ -85,9 +92,16 @@ def batcut(directory, filename, drow):
     else:
         with open('ok.csv', 'a') as to_cut:
             csv_cut = csv.DictWriter(to_cut, fieldnames=fn)
+            tmp_name = drow['File'].split(".wav")[0]
+            """actual_audio = AudioSegment.from_wav(directory + filename)
             for i in range(1,len(timer)):
-                print(i)
-            csv_cut.writerow(drow)
+                drow['File'] = tmp_name + "_" + str(i) + ".wav"
+                csv_cut.writerow(drow)
+                begin = timer[i-1]*1000
+                end = timer[i]*1000
+                new_audio = actual_audio[begin : end]
+                new_audio.export("/home/maxime/Documents/memoire/batnpz/" + drow['File'], format="wav")
+            """
             
  
 def findcut():
@@ -97,5 +111,6 @@ def findcut():
             batcut(row["Directory"], row['File'], row)
 
 
-batcut("/home/batmen/batnpz/", "test.wav", {"Directory" : "flip", "File" : "test.wav", "Id" : "etetet"})
+#batcut("/home/batmen/batnpz/", "38.wav", {"Directory" : "flip", "File" : "test.wav", "Id" : "etetet"})
+batcut("/home/maxime/Documents/memoire/batnpz/", "38.wav", {"Directory" : "/home/maxime/Documents/memoire/batnpz/", "File" : "38.wav", "Id" : "etetet"})
 #findcut()
