@@ -193,8 +193,8 @@ directory("/storage/LIFEPrairiesBocageres_2014/", "found_LIFEPrairiesBocageres_2
 directory("/storage/Plecobrux_ligne_161_Tout/", 'found_Plecobrux ligne 161_Tout.csv')
 directory("/storage/Plecolux_2016-TOUT/", "found_Plecolux 2016-TOUT.csv")
 
-directory ("/storage/SM2_Escaut2015/", "found_SM2_Escaut2015.csv")
-
+directory("/storage/SM2_Escaut2015/", "found_SM2_Escaut2015.csv")
+directory("/storage/cut/", "found_cut.csv")
 
 train_durations = np.array(train_durations)
 train_files = np.array(train_files)

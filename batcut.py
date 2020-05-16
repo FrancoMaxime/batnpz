@@ -12,7 +12,6 @@ def batcut(directory, filename, drow):
     error = False
     sub = subprocess.Popen("soxi " + directory + filename, shell=True, stdout=subprocess.PIPE)
     ret = sub.stdout.read()
-    print(type(ret))
     ret = ret.split("\n")
     
     duration = ret[5].split(' : ')[1].split("=")[0].split(':')
@@ -101,7 +100,7 @@ def batcut(directory, filename, drow):
                 begin = timer[i-1]*1000
                 end = timer[i]*1000
                 new_audio = actual_audio[begin : end]
-                new_audio.export("/home/batmen/batnpz/" + drow['File'], format="wav")
+                new_audio.export("/home/batmen/batnpz/cut/" + drow['File'], format="wav")
             
             
  
@@ -112,6 +111,6 @@ def findcut():
             batcut(row["Directory"], row['File'], row)
 
 
-batcut("/home/batmen/batnpz/", "38.wav", {"Directory" : "/home/batmen/batnpz/", "File" : "38.wav", "Id" : "etetet"})
+#batcut("/home/batmen/batnpz/", "38.wav", {"Directory" : "/home/batmen/batnpz/", "File" : "38.wav", "Id" : "etetet"})
 #batcut("/home/maxime/Documents/memoire/batnpz/", "38.wav", {"Directory" : "/home/maxime/Documents/memoire/batnpz/", "File" : "38.wav", "Id" : "etetet"})
-#findcut()
+findcut()
