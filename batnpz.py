@@ -56,7 +56,7 @@ species['Rhisp'] = 7
 species['Rhifer'] = 7
 species['Rhihip'] = 7
 
-countspecies={ 1 : [0,0], 2 : [0,0], 3 : [0,0], 4 : [0,0], 5 : [0,0], 6 : [0,0], 7 : [0,0]}
+countspecies={ 1 : [0,0,0,0], 2 : [0,0,0,0], 3 : [0,0,0,0], 4 : [0,0,0,0], 5 : [0,0,0,0], 6 : [0,0,0,0], 7 : [0,0,0,0]}
 
 def cleaning(group): 
     with open('meta' + group + '.csv') as cfile:
@@ -78,13 +78,14 @@ def cleaning(group):
                             for trow in treader:
                                 if trow['File'] == row['IN FILE']:
                                     if trow['Id'] not in ('ChiroSp', 'Pipsp', 'Nycsp') and countspecies[species[trow['Id']]][0] < 201:
-                                        cond = float( sum( countspecies[species[trow['Id']]] ) )
+                                        cond = float(countspecies[species[trow['Id']]][0] + countspecies[species[trow['Id']]][1])
                                         
                                         if cond != 0:
                                             cond = countspecies[species[trow['Id']]][0] / cond
                                         
                                         if cond < (9.0/10):
                                             countspecies[species[trow['Id']]][0] += 1
+                                            countspecies[species[trow['Id']]][2] += len(calls)
                                             train_files.append(row['IN FILE'].split('.')[0])
                                             tmp = float(row['DURATION'])
                                             if tmp > 9:
@@ -95,6 +96,7 @@ def cleaning(group):
                                             train_class.append(species[trow['Id']])
                                         else:
                                             countspecies[species[trow['Id']]][1] += 1
+                                            countspecies[species[trow['Id']]][3] += len(calls)
                                             test_files.append(row['IN FILE'].split('.')[0])
                                             tmp = float(row['DURATION'])
                                             if tmp > 9:
@@ -143,12 +145,13 @@ def directory(path, name="data.csv"):
                                 if nam == x:
                                     if trow['Id'] not in ('ChiroSp', 'Pipsp','Nycsp'):
                                         if duration < 50:
-                                            cond = float(sum(countspecies[species[trow['Id']]]))
-                                            
+                                            add = countspecies[species[trow['Id']]][0] + countspecies[species[trow['Id']]][1]
+                                            cond = float(add  )
                                             if cond != 0:
                                                 cond = countspecies[species[trow['Id']]][0] / cond
                                             if cond < (9.0/10):
                                                 countspecies[species[trow['Id']]][0] += 1
+                                                countspecies[species[trow['Id']]][2] += len(calls)
                                                 train_files.append(path + x.split('.')[0])
                                                 tmp = float(duration)
                                                 train_durations.append(tmp)
@@ -156,6 +159,7 @@ def directory(path, name="data.csv"):
                                                 train_class.append(species[trow['Id']])
                                             else:
                                                 countspecies[species[trow['Id']]][1] += 1
+                                                countspecies[species[trow['Id']]][3] += len(calls)
                                                 test_files.append(path + x.split('.')[0])
                                                 tmp = float(duration)
                                                 test_durations.append(tmp)
@@ -192,7 +196,7 @@ directory("/storage/LIFEPrairiesBocageres_2013_TOUT_test/", "found_LIFEPrairiesB
 directory("/storage/LIFEPrairiesBocageres_2014/", "found_LIFEPrairiesBocageres_2014.csv")
 directory("/storage/Plecobrux_ligne_161_Tout/", 'found_Plecobrux ligne 161_Tout.csv')
 directory("/storage/Plecolux_2016-TOUT/", "found_Plecolux 2016-TOUT.csv")
-
+directory("/storage/SM2-Ligne161/", "found_SM2-Ligne161.csv")
 directory("/storage/SM2_Escaut2015/", "found_SM2_Escaut2015.csv")
 directory("/storage/cut/", "found_cut.csv")
 
@@ -207,7 +211,7 @@ test_class = np.array(test_class)
 
 np.savez("test.npz", train_durations=train_durations, train_files=train_files, train_pos=train_pos, train_class=train_class, test_durations=test_durations, test_files=test_files, test_pos=test_pos, test_class=test_class)
 l = train_class
-
+"""
 for team in [ele for ind, ele in enumerate(l,1) if ele not in l[ind:]]:
     count = 0
     for ele in l:
@@ -215,3 +219,6 @@ for team in [ele for ind, ele in enumerate(l,1) if ele not in l[ind:]]:
             count += 1
     print("{} {}".format(team, count))
     count =0
+"""
+
+print(countspecies)
